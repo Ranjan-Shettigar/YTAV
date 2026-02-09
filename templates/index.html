@@ -248,8 +248,11 @@
                         label: 'Format',
                         size: 0
                     });
+                    downloadLinkDiv.style.display = 'none';
                     return;
                 }
+
+                downloadLinkDiv.style.display = 'none';
 
                 try {
                     const formData = new FormData();
@@ -266,14 +269,16 @@
                         handleInfoData(data);
                         messageDiv.style.display = 'none';
                     } else {
-                        messageDiv.className = 'message error';
-                        messageDiv.textContent = `Error: ${data.error}`;
-                        messageDiv.style.display = 'block';
+                        metaPanel.style.display = 'none';
+                        dropdownMenu.innerHTML = '';
+                        setDropdownEnabled(false);
+                        messageDiv.style.display = 'none';
                     }
                 } catch (error) {
-                    messageDiv.className = 'message error';
-                    messageDiv.textContent = `Error: ${error.message}`;
-                    messageDiv.style.display = 'block';
+                    metaPanel.style.display = 'none';
+                    dropdownMenu.innerHTML = '';
+                    setDropdownEnabled(false);
+                    messageDiv.style.display = 'none';
                 }
             }
 
