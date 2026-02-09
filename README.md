@@ -79,12 +79,12 @@ python main.py
 
    Or using uvicorn directly:
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 5000
 ```
 
 2. **Open your web browser and navigate to:**
 ```
-http://localhost:8000
+http://localhost:5000
 ```
 
 3. **Download videos:**
