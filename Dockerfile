@@ -1,9 +1,6 @@
-FROM python:3.10-alpine
+FROM python:3.10-slim
 
 WORKDIR /app
-
-# Install git
-RUN apk add --no-cache git
 
 # Install system dependencies (git for cloning, ffmpeg for audio)
 RUN apt-get update && apt-get install -y --no-install-recommends \
