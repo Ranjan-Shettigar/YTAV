@@ -3,316 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Video Downloader</title>
+    <title>YTAV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎥 YouTube Downloader</h1>
-            <p class="subtitle">Download YouTube videos as MP4 or audio as MP3/WAV with quality options</p>
-        </header>
+    <div class="main-container">
+        <h1 class="logo">YTAV</h1>
 
-        <main>
-            <div class="download-card">
-                <form id="downloadForm">
-                    <div class="form-group">
-                        <label for="url">YouTube URL</label>
-                        <input 
-                            type="text" 
-                            id="url" 
-                            name="url" 
-                            placeholder="https://www.youtube.com/watch?v=..." 
-                            required
-                        >
-                        <button type="button" class="btn-info" id="getInfoBtn">Get Video Info</button>
+        <form id="downloadForm" class="input-group">
+            <div class="dropdown">
+                <button class="dropdown-trigger" id="dropdownTrigger" type="button" disabled>
+                    <span class="material-icons-outlined selected-icon">tune</span>
+                    <span class="selected-text">Format</span>
+                    <span class="material-icons-outlined chevron">expand_more</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-item" data-format="mp4" data-quality="best" data-icon="high_quality">
+                        <span class="material-icons-outlined">high_quality</span>
+                        <span>Video - Max</span>
                     </div>
-
-                    <div id="videoInfo" style="display: none;" class="video-info">
-                        <h3 id="videoTitle"></h3>
-                        <p id="videoDuration"></p>
+                    <div class="dropdown-item" data-format="mp4" data-quality="mid" data-icon="movie">
+                        <span class="material-icons-outlined">movie</span>
+                        <span>Video - Mid</span>
                     </div>
-
-                    <div class="form-group">
-                        <label>Format</label>
-                        <div class="format-options">
-                            <label class="radio-label">
-                                <input type="radio" name="format" value="mp4" checked>
-                                <span class="radio-custom">
-                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
-                                    </svg>
-                                    MP4 (Video)
-                                </span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="format" value="mp3">
-                                <span class="radio-custom">
-                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
-                                    </svg>
-                                    MP3 (Audio)
-                                </span>
-                            </label>
-                            <label class="radio-label">
-                                <input type="radio" name="format" value="wav">
-                                <span class="radio-custom">
-                                    <svg width="16" height="16" viewBox="0 0 16 16">
-                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
-                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
-                                    </svg>
-                                    WAV (16-bit)
-                                </span>
-                            </label>
-                        </div>
+                    <div class="dropdown-item" data-format="mp4" data-quality="low" data-icon="sd">
+                        <span class="material-icons-outlined">sd</span>
+                        <span>Video - Low</span>
                     </div>
-
-                    <div class="form-group" id="videoQualityGroup" style="display: none;">
-                        <label>Video Quality</label>
-                        <select name="quality" id="videoQuality" class="quality-select">
-                            <option value="">Best Available</option>
-                        </select>
+                    <div class="dropdown-item" data-format="mp3" data-quality="320" data-icon="music_note">
+                        <span class="material-icons-outlined">music_note</span>
+                        <span>Audio - MP3</span>
                     </div>
-
-                    <div id="estimatedSize" class="estimated-size" style="display: none;">
-                        <strong>Estimated Size:</strong> <span id="sizeText">-</span>
+                    <div class="dropdown-item" data-format="wav" data-quality="" data-icon="graphic_eq">
+                        <span class="material-icons-outlined">graphic_eq</span>
+                        <span>Audio - WAV</span>
                     </div>
-
-                    <button type="submit" class="btn-download" id="downloadBtn">
-                        <span class="btn-text">Download</span>
-                        <span class="btn-loader" style="display: none;">
-                            <div class="spinner"></div>
-                            Downloading...
-                        </span>
-                    </button>
-                </form>
-
-                <div id="message" class="message" style="display: none;"></div>
-                <div id="downloadLink" style="display: none;"></div>
+                </div>
             </div>
 
-            <div class="info-section">
-                <h3>ℹ️ How to use</h3>
-                <ol>
-                    <li>Copy the YouTube video URL</li>
-                    <li>Paste it in the input field above</li>
-                    <li>Click "Get Video Info" to see available qualities and estimated sizes</li>
-                    <li>Select your preferred format:
-                        <ul style="margin-top: 5px;">
-                            <li><strong>MP4</strong> - Video format with quality options</li>
-                            <li><strong>MP3</strong> - Audio in 320 kbps (maximum quality)</li>
-                            <li><strong>WAV</strong> - Uncompressed 16-bit audio</li>
-                        </ul>
-                    </li>
-                    <li>Choose quality settings (optional)</li>
-                    <li>Click the Download button and wait for completion</li>
-                </ol>
-                <p class="note"><strong>💾 Smart Caching:</strong> Files are cached for 30 minutes. If someone already downloaded the same video, you'll get it instantly! Files are automatically deleted after 30 minutes.</p>
-                <p class="note"><strong>Note:</strong> Make sure you have ffmpeg installed on your system for format conversion.</p>
-            </div>
-        </main>
+            <input type="text" class="url-input" id="url" name="url" placeholder="Enter URL" required>
+            <input type="hidden" id="formatField" name="format" value="mp3">
+            <input type="hidden" id="qualityField" name="quality" value="320">
 
-        <footer>
-            <p>Built with FastAPI, yt-dlp, and ❤️</p>
-        </footer>
+            <button class="download-btn" id="downloadBtn" type="submit">
+                <span class="material-icons-outlined">cloud_download</span>
+            </button>
+        </form>
+
+        <div class="meta-panel" id="metaPanel" style="display: none;">
+            <div class="meta-title" id="videoTitle"></div>
+            <div class="meta-sub" id="metaSub"></div>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+        <div id="downloadLink" style="display: none;"></div>
     </div>
 
     <script>
-        const form = document.getElementById('downloadForm');
-        const messageDiv = document.getElementById('message');
-        const downloadLinkDiv = document.getElementById('downloadLink');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const btnText = downloadBtn.querySelector('.btn-text');
-        const btnLoader = downloadBtn.querySelector('.btn-loader');
-        const getInfoBtn = document.getElementById('getInfoBtn');
-        const urlInput = document.getElementById('url');
-        const videoInfoDiv = document.getElementById('videoInfo');
-        const formatRadios = document.querySelectorAll('input[name="format"]');
-        const videoQualityGroup = document.getElementById('videoQualityGroup');
-        const videoQualitySelect = document.getElementById('videoQuality');
-        const estimatedSizeDiv = document.getElementById('estimatedSize');
-        const sizeText = document.getElementById('sizeText');
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdownTrigger = document.getElementById('dropdownTrigger');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const selectedText = dropdownTrigger.querySelector('.selected-text');
+            const selectedIcon = dropdownTrigger.querySelector('.selected-icon');
+            const urlInput = document.getElementById('url');
+            const formatField = document.getElementById('formatField');
+            const qualityField = document.getElementById('qualityField');
+            const metaPanel = document.getElementById('metaPanel');
+            const videoTitle = document.getElementById('videoTitle');
+            const metaSub = document.getElementById('metaSub');
+            const messageDiv = document.getElementById('message');
+            const downloadLinkDiv = document.getElementById('downloadLink');
+            const form = document.getElementById('downloadForm');
+            const downloadBtn = document.getElementById('downloadBtn');
 
-        let videoData = null;
+            let videoData = null;
+            let fetchTimeout = null;
+            let currentSelection = {
+                format: 'mp3',
+                quality: '320',
+                icon: 'tune',
+                label: 'Format',
+                size: 0
+            };
+            let durationText = '';
 
-        // Get video info
-        getInfoBtn.addEventListener('click', async () => {
-            const url = urlInput.value.trim();
-            if (!url) {
-                alert('Please enter a YouTube URL');
-                return;
+            const formatIcons = {
+                mp4: 'high_quality',
+                mp3: 'music_note',
+                wav: 'graphic_eq'
+            };
+
+            function setSelection(selection) {
+                currentSelection = selection;
+                selectedText.textContent = selection.label;
+                selectedIcon.textContent = selection.icon || formatIcons[selection.format] || 'headphones';
+                formatField.value = selection.format;
+                qualityField.value = selection.quality || '';
+                updateMetaInfo();
             }
 
-            getInfoBtn.disabled = true;
-            getInfoBtn.textContent = 'Loading...';
-            videoInfoDiv.style.display = 'none';
-            messageDiv.style.display = 'none';
+            function setDropdownEnabled(enabled) {
+                dropdownTrigger.disabled = !enabled;
+                dropdownTrigger.classList.toggle('disabled', !enabled);
+                if (!enabled) {
+                    dropdownMenu.classList.remove('show');
+                }
+            }
 
-            try {
-                const formData = new FormData();
-                formData.append('url', url);
+            function updateMetaInfo() {
+                if (!videoData) {
+                    metaPanel.style.display = 'none';
+                    return;
+                }
 
-                const response = await fetch('/info', {
-                    method: 'POST',
-                    body: formData
-                });
+                let size = 0;
+                if (currentSelection.format === 'mp4') {
+                    size = currentSelection.size || 0;
+                } else if (currentSelection.format === 'mp3') {
+                    size = videoData.audio_estimates.mp3_320;
+                } else if (currentSelection.format === 'wav') {
+                    size = videoData.audio_estimates.wav;
+                }
 
-                const data = await response.json();
+                const sizeText = size > 0 ? ` | Size ~${size} MB` : '';
+                metaSub.textContent = `${durationText}${sizeText}`.trim();
+                metaPanel.style.display = 'block';
+            }
 
-                if (data.success) {
-                    videoData = data;
-                    document.getElementById('videoTitle').textContent = data.title;
-                    const minutes = Math.floor(data.duration / 60);
-                    const seconds = data.duration % 60;
-                    document.getElementById('videoDuration').textContent = 
-                        `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    videoInfoDiv.style.display = 'block';
+            function buildDropdownItems(data) {
+                dropdownMenu.innerHTML = '';
 
-                    // Populate video quality options
-                    videoQualitySelect.innerHTML = '<option value="">Best Available</option>';
+                if (!data || !data.success) {
+                    return;
+                }
+
+                if (Array.isArray(data.video_formats) && data.video_formats.length > 0) {
                     data.video_formats.forEach(fmt => {
-                        const option = document.createElement('option');
-                        option.value = fmt.quality;
-                        option.textContent = `${fmt.quality} (~${fmt.size_mb} MB)`;
-                        videoQualitySelect.appendChild(option);
+                        addDropdownItem({
+                            label: `Video - ${fmt.quality}`,
+                            icon: 'movie',
+                            format: 'mp4',
+                            quality: fmt.quality,
+                            size: fmt.size_mb || 0
+                        });
+                    });
+                }
+
+                    addDropdownItem({
+                        label: 'Audio - MP3',
+                        icon: 'music_note',
+                        format: 'mp3',
+                        quality: '320',
+                        size: data.audio_estimates.mp3_320
                     });
 
-                    updateQualityOptions();
-                } else {
-                    messageDiv.className = 'message error';
-                    messageDiv.textContent = `Error: ${data.error}`;
-                    messageDiv.style.display = 'block';
-                }
-            } catch (error) {
-                messageDiv.className = 'message error';
-                messageDiv.textContent = `Error: ${error.message}`;
-                messageDiv.style.display = 'block';
-            } finally {
-                getInfoBtn.disabled = false;
-                getInfoBtn.textContent = 'Get Video Info';
-            }
-        });
-
-        // Update quality options based on format
-        formatRadios.forEach(radio => {
-            radio.addEventListener('change', updateQualityOptions);
-        });
-
-        videoQualitySelect.addEventListener('change', updateEstimatedSize);
-
-        function updateQualityOptions() {
-            const selectedFormat = document.querySelector('input[name="format"]:checked').value;
-            
-            videoQualityGroup.style.display = 'none';
-            estimatedSizeDiv.style.display = 'none';
-
-            if (selectedFormat === 'mp4') {
-                videoQualityGroup.style.display = 'block';
-                updateEstimatedSize();
-            } else if (selectedFormat === 'mp3' || selectedFormat === 'wav') {
-                updateEstimatedSize();
-            }
-        }
-
-        function updateEstimatedSize() {
-            if (!videoData) return;
-
-            const selectedFormat = document.querySelector('input[name="format"]:checked').value;
-            let size = 0;
-
-            if (selectedFormat === 'mp4') {
-                const quality = videoQualitySelect.value;
-                if (quality) {
-                    const fmt = videoData.video_formats.find(f => f.quality === quality);
-                    if (fmt && fmt.size_mb) {
-                        size = fmt.size_mb;
-                    }
-                } else {
-                    // Best quality
-                    if (videoData.video_formats.length > 0) {
-                        size = videoData.video_formats[0].size_mb;
-                    }
-                }
-            } else if (selectedFormat === 'mp3') {
-                size = videoData.audio_estimates.mp3_320;
-            } else if (selectedFormat === 'wav') {
-                size = videoData.audio_estimates.wav;
+                    addDropdownItem({
+                        label: 'Audio - WAV',
+                        icon: 'graphic_eq',
+                        format: 'wav',
+                        quality: '',
+                        size: data.audio_estimates.wav
+                    });
             }
 
-            if (size > 0) {
-                sizeText.textContent = `~${size} MB`;
-                estimatedSizeDiv.style.display = 'block';
-            } else {
-                estimatedSizeDiv.style.display = 'none';
-            }
-        }
+            function addDropdownItem({ label, icon, format, quality, size }) {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.dataset.format = format;
+                item.dataset.quality = quality || '';
+                item.dataset.size = size || 0;
+                item.dataset.icon = icon;
+                item.innerHTML = `
+                    <span class="material-icons-outlined">${icon}</span>
+                    <span>${label}</span>
+                `;
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // Reset messages
-            messageDiv.style.display = 'none';
-            downloadLinkDiv.style.display = 'none';
-            
-            // Show loading state
-            downloadBtn.disabled = true;
-            btnText.style.display = 'none';
-            btnLoader.style.display = 'flex';
-
-            const formData = new FormData(form);
-            
-            // Add quality based on format
-            const selectedFormat = formData.get('format');
-            if (selectedFormat === 'mp4') {
-                const quality = videoQualitySelect.value;
-                if (quality) {
-                    formData.set('quality', quality);
-                }
-            } else if (selectedFormat === 'mp3') {
-                formData.set('quality', '320');
-            }
-            
-            try {
-                const response = await fetch('/download', {
-                    method: 'POST',
-                    body: formData
+                item.addEventListener('click', () => {
+                    setSelection({
+                        format,
+                        quality,
+                        icon,
+                        label,
+                        size: Number(size) || 0
+                    });
+                    dropdownMenu.classList.remove('show');
                 });
 
-                const data = await response.json();
+                dropdownMenu.appendChild(item);
+            }
 
-                if (data.success) {
-                    if (data.cached) {
-                        messageDiv.className = 'message success cached';
-                        messageDiv.textContent = '✓ Serving cached file (downloaded within last 30 minutes)';
+            // Toggle dropdown
+            dropdownTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dropdownTrigger.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+
+            function handleInfoData(data) {
+                videoData = data;
+                if (data && data.success) {
+                    videoTitle.textContent = data.title || 'Unknown title';
+                    const minutes = Math.floor(data.duration / 60);
+                    const seconds = data.duration % 60;
+                    durationText = `Duration ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    buildDropdownItems(data);
+                    setDropdownEnabled(true);
+
+                    const firstVideo = data.video_formats && data.video_formats[0];
+                    if (currentSelection.format === 'mp4' && firstVideo) {
+                        setSelection({
+                            format: 'mp4',
+                            quality: firstVideo.quality,
+                            icon: 'movie',
+                            label: `Video - ${firstVideo.quality}`,
+                            size: firstVideo.size_mb || 0
+                        });
                     } else {
-                        messageDiv.className = 'message success';
-                        messageDiv.textContent = data.message;
+                        updateMetaInfo();
                     }
-                    messageDiv.style.display = 'block';
+                }
+            }
 
-                    downloadLinkDiv.innerHTML = `
-                        <a href="${data.download_url}" class="download-link" download>
-                            📥 Click here to download your file
-                        </a>
-                    `;
-                    downloadLinkDiv.style.display = 'block';
-                } else {
+            async function fetchInfo(url) {
+                if (!url) {
+                    metaPanel.style.display = 'none';
+                    videoData = null;
+                    dropdownMenu.innerHTML = '';
+                    setDropdownEnabled(false);
+                    setSelection({
+                        format: 'mp3',
+                        quality: '320',
+                        icon: 'tune',
+                        label: 'Format',
+                        size: 0
+                    });
+                    return;
+                }
+
+                try {
+                    const formData = new FormData();
+                    formData.append('url', url);
+
+                    const response = await fetch('/info', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        handleInfoData(data);
+                        messageDiv.style.display = 'none';
+                    } else {
+                        messageDiv.className = 'message error';
+                        messageDiv.textContent = `Error: ${data.error}`;
+                        messageDiv.style.display = 'block';
+                    }
+                } catch (error) {
                     messageDiv.className = 'message error';
-                    messageDiv.textContent = `Error: ${data.error}`;
+                    messageDiv.textContent = `Error: ${error.message}`;
                     messageDiv.style.display = 'block';
                 }
-            } catch (error) {
-                messageDiv.className = 'message error';
-                messageDiv.textContent = `Error: ${error.message}`;
-                messageDiv.style.display = 'block';
-            } finally {
-                // Reset button state
-                downloadBtn.disabled = false;
-                btnText.style.display = 'inline';
-                btnLoader.style.display = 'none';
             }
+
+            urlInput.addEventListener('input', () => {
+                const url = urlInput.value.trim();
+                clearTimeout(fetchTimeout);
+                fetchTimeout = setTimeout(() => {
+                    fetchInfo(url);
+                }, 600);
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const url = urlInput.value.trim();
+                if (!url) {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = 'Please enter a YouTube URL';
+                    messageDiv.style.display = 'block';
+                    return;
+                }
+
+                messageDiv.style.display = 'none';
+                downloadLinkDiv.style.display = 'none';
+                downloadBtn.disabled = true;
+                downloadBtn.classList.add('loading');
+
+                const formData = new FormData();
+                formData.append('url', url);
+                formData.append('format', formatField.value);
+                if (qualityField.value) {
+                    formData.append('quality', qualityField.value);
+                }
+
+                try {
+                    const response = await fetch('/download', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (data.cached) {
+                            messageDiv.className = 'message success cached';
+                            messageDiv.textContent = 'Serving cached file (downloaded within last 30 minutes)';
+                        } else {
+                            messageDiv.className = 'message success';
+                            messageDiv.textContent = data.message || 'Download ready';
+                        }
+                        messageDiv.style.display = 'block';
+
+                        downloadLinkDiv.innerHTML = `
+                            <a href="${data.download_url}" class="download-link" download>
+                                Click here to download your file
+                            </a>
+                        `;
+                        downloadLinkDiv.style.display = 'block';
+                    } else {
+                        messageDiv.className = 'message error';
+                        messageDiv.textContent = `Error: ${data.error}`;
+                        messageDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = `Error: ${error.message}`;
+                    messageDiv.style.display = 'block';
+                } finally {
+                    downloadBtn.disabled = false;
+                    downloadBtn.classList.remove('loading');
+                }
+            });
+
+            setSelection(currentSelection);
+            setDropdownEnabled(false);
         });
     </script>
 </body>
