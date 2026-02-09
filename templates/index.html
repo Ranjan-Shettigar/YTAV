@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎥 YouTube Downloader</h1>
+            <p class="subtitle">Download YouTube videos as MP4 or audio as MP3/WAV with quality options</p>
+        </header>
+
+        <main>
+            <div class="download-card">
+                <form id="downloadForm">
+                    <div class="form-group">
+                        <label for="url">YouTube URL</label>
+                        <input 
+                            type="text" 
+                            id="url" 
+                            name="url" 
+                            placeholder="https://www.youtube.com/watch?v=..." 
+                            required
+                        >
+                        <button type="button" class="btn-info" id="getInfoBtn">Get Video Info</button>
+                    </div>
+
+                    <div id="videoInfo" style="display: none;" class="video-info">
+                        <h3 id="videoTitle"></h3>
+                        <p id="videoDuration"></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Format</label>
+                        <div class="format-options">
+                            <label class="radio-label">
+                                <input type="radio" name="format" value="mp4" checked>
+                                <span class="radio-custom">
+                                    <svg width="16" height="16" viewBox="0 0 16 16">
+                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
+                                    </svg>
+                                    MP4 (Video)
+                                </span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="format" value="mp3">
+                                <span class="radio-custom">
+                                    <svg width="16" height="16" viewBox="0 0 16 16">
+                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
+                                    </svg>
+                                    MP3 (Audio)
+                                </span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="format" value="wav">
+                                <span class="radio-custom">
+                                    <svg width="16" height="16" viewBox="0 0 16 16">
+                                        <circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                                        <circle cx="8" cy="8" r="4" fill="currentColor"/>
+                                    </svg>
+                                    WAV (16-bit)
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="videoQualityGroup" style="display: none;">
+                        <label>Video Quality</label>
+                        <select name="quality" id="videoQuality" class="quality-select">
+                            <option value="">Best Available</option>
+                        </select>
+                    </div>
+
+                    <div id="estimatedSize" class="estimated-size" style="display: none;">
+                        <strong>Estimated Size:</strong> <span id="sizeText">-</span>
+                    </div>
+
+                    <button type="submit" class="btn-download" id="downloadBtn">
+                        <span class="btn-text">Download</span>
+                        <span class="btn-loader" style="display: none;">
+                            <div class="spinner"></div>
+                            Downloading...
+                        </span>
+                    </button>
+                </form>
+
+                <div id="message" class="message" style="display: none;"></div>
+                <div id="downloadLink" style="display: none;"></div>
+            </div>
+
+            <div class="info-section">
+                <h3>ℹ️ How to use</h3>
+                <ol>
+                    <li>Copy the YouTube video URL</li>
+                    <li>Paste it in the input field above</li>
+                    <li>Click "Get Video Info" to see available qualities and estimated sizes</li>
+                    <li>Select your preferred format:
+                        <ul style="margin-top: 5px;">
+                            <li><strong>MP4</strong> - Video format with quality options</li>
+                            <li><strong>MP3</strong> - Audio in 320 kbps (maximum quality)</li>
+                            <li><strong>WAV</strong> - Uncompressed 16-bit audio</li>
+                        </ul>
+                    </li>
+                    <li>Choose quality settings (optional)</li>
+                    <li>Click the Download button and wait for completion</li>
+                </ol>
+                <p class="note"><strong>💾 Smart Caching:</strong> Files are cached for 30 minutes. If someone already downloaded the same video, you'll get it instantly! Files are automatically deleted after 30 minutes.</p>
+                <p class="note"><strong>Note:</strong> Make sure you have ffmpeg installed on your system for format conversion.</p>
+            </div>
+        </main>
+
+        <footer>
+            <p>Built with FastAPI, yt-dlp, and ❤️</p>
+        </footer>
+    </div>
+
+    <script>
+        const form = document.getElementById('downloadForm');
+        const messageDiv = document.getElementById('message');
+        const downloadLinkDiv = document.getElementById('downloadLink');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const btnText = downloadBtn.querySelector('.btn-text');
+        const btnLoader = downloadBtn.querySelector('.btn-loader');
+        const getInfoBtn = document.getElementById('getInfoBtn');
+        const urlInput = document.getElementById('url');
+        const videoInfoDiv = document.getElementById('videoInfo');
+        const formatRadios = document.querySelectorAll('input[name="format"]');
+        const videoQualityGroup = document.getElementById('videoQualityGroup');
+        const videoQualitySelect = document.getElementById('videoQuality');
+        const estimatedSizeDiv = document.getElementById('estimatedSize');
+        const sizeText = document.getElementById('sizeText');
+
+        let videoData = null;
+
+        // Get video info
+        getInfoBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a YouTube URL');
+                return;
+            }
+
+            getInfoBtn.disabled = true;
+            getInfoBtn.textContent = 'Loading...';
+            videoInfoDiv.style.display = 'none';
+            messageDiv.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                formData.append('url', url);
+
+                const response = await fetch('/info', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    videoData = data;
+                    document.getElementById('videoTitle').textContent = data.title;
+                    const minutes = Math.floor(data.duration / 60);
+                    const seconds = data.duration % 60;
+                    document.getElementById('videoDuration').textContent = 
+                        `Duration: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    videoInfoDiv.style.display = 'block';
+
+                    // Populate video quality options
+                    videoQualitySelect.innerHTML = '<option value="">Best Available</option>';
+                    data.video_formats.forEach(fmt => {
+                        const option = document.createElement('option');
+                        option.value = fmt.quality;
+                        option.textContent = `${fmt.quality} (~${fmt.size_mb} MB)`;
+                        videoQualitySelect.appendChild(option);
+                    });
+
+                    updateQualityOptions();
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = `Error: ${data.error}`;
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = `Error: ${error.message}`;
+                messageDiv.style.display = 'block';
+            } finally {
+                getInfoBtn.disabled = false;
+                getInfoBtn.textContent = 'Get Video Info';
+            }
+        });
+
+        // Update quality options based on format
+        formatRadios.forEach(radio => {
+            radio.addEventListener('change', updateQualityOptions);
+        });
+
+        videoQualitySelect.addEventListener('change', updateEstimatedSize);
+
+        function updateQualityOptions() {
+            const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+            
+            videoQualityGroup.style.display = 'none';
+            estimatedSizeDiv.style.display = 'none';
+
+            if (selectedFormat === 'mp4') {
+                videoQualityGroup.style.display = 'block';
+                updateEstimatedSize();
+            } else if (selectedFormat === 'mp3' || selectedFormat === 'wav') {
+                updateEstimatedSize();
+            }
+        }
+
+        function updateEstimatedSize() {
+            if (!videoData) return;
+
+            const selectedFormat = document.querySelector('input[name="format"]:checked').value;
+            let size = 0;
+
+            if (selectedFormat === 'mp4') {
+                const quality = videoQualitySelect.value;
+                if (quality) {
+                    const fmt = videoData.video_formats.find(f => f.quality === quality);
+                    if (fmt && fmt.size_mb) {
+                        size = fmt.size_mb;
+                    }
+                } else {
+                    // Best quality
+                    if (videoData.video_formats.length > 0) {
+                        size = videoData.video_formats[0].size_mb;
+                    }
+                }
+            } else if (selectedFormat === 'mp3') {
+                size = videoData.audio_estimates.mp3_320;
+            } else if (selectedFormat === 'wav') {
+                size = videoData.audio_estimates.wav;
+            }
+
+            if (size > 0) {
+                sizeText.textContent = `~${size} MB`;
+                estimatedSizeDiv.style.display = 'block';
+            } else {
+                estimatedSizeDiv.style.display = 'none';
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Reset messages
+            messageDiv.style.display = 'none';
+            downloadLinkDiv.style.display = 'none';
+            
+            // Show loading state
+            downloadBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'flex';
+
+            const formData = new FormData(form);
+            
+            // Add quality based on format
+            const selectedFormat = formData.get('format');
+            if (selectedFormat === 'mp4') {
+                const quality = videoQualitySelect.value;
+                if (quality) {
+                    formData.set('quality', quality);
+                }
+            } else if (selectedFormat === 'mp3') {
+                formData.set('quality', '320');
+            }
+            
+            try {
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.cached) {
+                        messageDiv.className = 'message success cached';
+                        messageDiv.textContent = '✓ Serving cached file (downloaded within last 30 minutes)';
+                    } else {
+                        messageDiv.className = 'message success';
+                        messageDiv.textContent = data.message;
+                    }
+                    messageDiv.style.display = 'block';
+
+                    downloadLinkDiv.innerHTML = `
+                        <a href="${data.download_url}" class="download-link" download>
+                            📥 Click here to download your file
+                        </a>
+                    `;
+                    downloadLinkDiv.style.display = 'block';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = `Error: ${data.error}`;
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = `Error: ${error.message}`;
+                messageDiv.style.display = 'block';
+            } finally {
+                // Reset button state
+                downloadBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
